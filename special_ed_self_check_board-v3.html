@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>중학부 맞춤형 자기점검 & 행동계약서 보드</title>
+  <style>
+    :root {
+      --bg: #f0f4ff;
+      --card: #ffffff;
+      --primary: #4f46e5;
+      --primary-light: #e0e7ff;
+      --accent: #f59e0b;
+      --accent-light: #fef3c7;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f97316;
+      --warning-light: #ffedd5;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --text-main: #1e293b;
+      --text-sub: #475569;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* 상단 헤더 */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      padding: 16px 22px;
+      border-radius: 22px;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .board-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-pill {
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--primary);
+      background: white;
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .mode-pill.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* 메인 메뉴 탭 (자기점검표 vs 행동계약서) */
+    .main-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .main-nav-btn {
+      padding: 16px 20px;
+      border-radius: 18px;
+      border: 3px solid var(--border);
+      background: var(--card);
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--text-sub);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+    }
+
+    .main-nav-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .main-nav-btn.active {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      border-color: #312e81;
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
+    }
+
+    /* 학생 & 요일 탭 */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      align-items: center;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: 16px;
+      background: var(--card);
+      border: 3px solid transparent;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-sub);
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: #312e81;
+    }
+
+    .edit-name-badge {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: 0.85rem;
+      margin-left: 4px;
+      cursor: pointer;
+    }
+
+    .edit-name-badge:hover {
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .day-btn {
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    .day-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: #d97706;
+    }
+
+    .privacy-btn {
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 2px solid #94a3b8;
+      background: #f8fafc;
+      font-weight: 900;
+      font-size: 0.92rem;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .privacy-btn.locked {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: #b45309;
+    }
+
+    /* 보기 전환 바 (한 교시씩 크게 보기 vs 전체 보기 + 가리기 버튼) */
+    .view-switcher {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .period-nav-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .p-nav-btn {
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .p-nav-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: #312e81;
+    }
+
+    /* 교시 평가 카드 */
+    .period-card {
+      background: var(--card);
+      border-radius: 26px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      border: 4px solid #e2e8f0;
+    }
+
+    .period-card.status-good {
+      border-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .period-card.status-try {
+      border-color: var(--warning);
+      background: #fffbeb;
+    }
+
+    .period-card.status-bad {
+      border-color: var(--danger);
+      background: #fef2f2;
+    }
+
+    .period-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 2px dashed var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .period-badge {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .meta-inputs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .meta-input {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      font-size: 1.05rem;
+      font-weight: 800;
+      width: 150px;
+      background: white;
+    }
+
+    /* 학생 & 선생님 선택 영역 */
+    .eval-section {
+      background: white;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .eval-who {
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .scale-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .scale-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .scale-grid-5, .scale-grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .big-choice-btn {
+      padding: 16px 10px;
+      border-radius: 18px;
+      border: 3px solid #cbd5e1;
+      background: #f8fafc;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .big-choice-btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .big-choice-btn .big-emoji {
+      font-size: 2.5rem;
+    }
+
+    .big-choice-btn .stars-row {
+      font-size: 1rem;
+      letter-spacing: -2px;
+    }
+
+    .big-choice-btn .action-text {
+      font-size: 0.96rem;
+      font-weight: 900;
+      color: var(--text-main);
+      word-break: keep-all;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .big-choice-btn.selected-student {
+      background: var(--primary);
+      border-color: #312e81;
+      color: white;
+      transform: scale(1.03);
+      box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
+    }
+
+    .big-choice-btn.selected-student .action-text {
+      color: white;
+    }
+
+    .big-choice-btn.selected-teacher {
+      background: var(--accent);
+      border-color: #b45309;
+      color: white;
+      transform: scale(1.03);
+      box-shadow: 0 6px 14px rgba(245, 158, 11, 0.3);
+    }
+
+    .big-choice-btn.selected-teacher .action-text {
+      color: white;
+    }
+
+    .blind-notice {
+      background: #f1f5f9;
+      border: 3px dashed #94a3b8;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #475569;
+    }
+
+    .match-feedback {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: white;
+      border: 3px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .feedback-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .feedback-stamp {
+      font-size: 2.6rem;
+    }
+
+    .feedback-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+    }
+
+    .feedback-sub {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    /* 참 잘했어요 도장판 (하단 배치: 담임교사용 개별화 설정 바로 위) */
+    .token-board {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 22px 24px;
+      margin-top: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      border: 3px solid #c7d2fe;
+    }
+
+    .token-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .token-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .token-slots {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .token-slots {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .token-slot {
+      background: #f8fafc;
+      border: 3px dashed #cbd5e1;
+      border-radius: 18px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .token-slot.active-period {
+      border-style: solid;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .token-slot.stamp-good {
+      background: var(--success-light);
+      border: 3px solid var(--success);
+    }
+
+    .token-slot.stamp-try {
+      background: var(--warning-light);
+      border: 3px solid var(--warning);
+    }
+
+    .token-slot.stamp-bad {
+      background: var(--danger-light);
+      border: 3px solid var(--danger);
+    }
+
+    .slot-period {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .slot-icon {
+      font-size: 2.2rem;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-label {
+      font-size: 0.85rem;
+      font-weight: 900;
+      margin-top: 4px;
+    }
+
+    .promise-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .promise-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .promise-box {
+      padding: 14px 18px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+    }
+
+    .promise-box.reward-box {
+      background: #ecfdf5;
+      border: 2px solid var(--success);
+      color: #065f46;
+    }
+
+    .promise-box.practice-box {
+      background: #fff7ed;
+      border: 2px solid var(--warning);
+      color: #9a3412;
+    }
+
+    /* 하단 교사용 설정 영역 */
+    .teacher-settings {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 22px;
+      margin-top: 16px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .setting-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .setting-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .celebration-banner {
+      display: none;
+      background: linear-gradient(90deg, #10b981, #3b82f6);
+      color: white;
+      text-align: center;
+      padding: 18px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-top: 16px;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+    }
+
+    /* =========================================
+       행동계약서 탭 (출력 & 전자서명 지원) 스타일
+       ========================================= */
+    .contract-wrapper {
+      display: none;
+    }
+
+    .contract-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      padding: 14px 20px;
+      border-radius: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .print-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .contract-paper {
+      background: white;
+      border: 5px double #312e81;
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .contract-title {
+      text-align: center;
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #1e1b4b;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .contract-subtitle {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-sub);
+      margin-bottom: 28px;
+    }
+
+    .contract-pledge {
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 20px 24px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .contract-rules-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contract-rule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .contract-rule-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-light);
+      border: 3px solid #818cf8;
+      border-radius: 18px;
+      padding: 18px 22px;
+      gap: 14px;
+    }
+
+    .contract-rule-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #1e1b4b;
+    }
+
+    .contract-check-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 3px solid #312e81;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .contract-outcome-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 680px) {
+      .contract-outcome-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .contract-outcome-card {
+      padding: 20px;
+      border-radius: 18px;
+      border: 3px solid;
+    }
+
+    .contract-outcome-card.good {
+      background: #ecfdf5;
+      border-color: var(--success);
+      color: #065f46;
+    }
+
+    .contract-outcome-card.bad {
+      background: #fff7ed;
+      border-color: var(--warning);
+      color: #9a3412;
+    }
+
+    .contract-outcome-card h4 {
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .contract-outcome-card p {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .contract-date-row {
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 900;
+      margin-bottom: 26px;
+      color: var(--text-main);
+    }
+
+    .contract-date-input {
+      font-size: 1.15rem;
+      font-weight: 900;
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      text-align: center;
+    }
+
+    .signature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 680px) {
+      .signature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sig-box {
+      border: 2px solid #94a3b8;
+      border-radius: 18px;
+      padding: 16px;
+      background: #f8fafc;
+      text-align: center;
+    }
+
+    .sig-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+
+    .sig-clear-btn {
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--text-sub);
+    }
+
+    .sig-canvas {
+      width: 100%;
+      height: 130px;
+      background: white;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .sig-guide {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      margin-top: 6px;
+      font-weight: 700;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* 인쇄(출력) 시 행동계약서만 깔끔하게 A4 1장으로 나오도록 설정 */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+      header, .main-nav, .top-bar, #checkTabView, .contract-toolbar, .sig-clear-btn, .sig-guide, #confettiCanvas {
+        display: none !important;
+      }
+      #contractTabView {
+        display: block !important;
+      }
+      .contract-paper {
+        box-shadow: none;
+        border: 4px double #000;
+        padding: 24px;
+      }
+      .sig-canvas {
+        border: 1px solid #94a3b8;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="container">
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="board-title">🏫 수업 약속 자기점검 & 행동계약서</div>
+    <div class="header-controls" id="scaleControls">
+      <button class="mode-pill" id="scaleMode5" onclick="setScaleMode(5)">⭐ 5점 척도 (기본)</button>
+      <button class="mode-pill" id="scaleMode3" onclick="setScaleMode(3)">🚦 3단계 척도 (쉬운 버전)</button>
+    </div>
+  </header>
+
+  <!-- 메인 탭 전환 (1~6교시 자기점검표 vs 매교시 3가지 약속 행동계약서) -->
+  <div class="main-nav">
+    <button class="main-nav-btn active" id="navCheckBtn" onclick="switchMainTab('check')">
+      📋 1~6교시 자기점검표
+    </button>
+    <button class="main-nav-btn" id="navContractBtn" onclick="switchMainTab('contract')">
+      📜 매교시 3가지 약속 행동계약서 (사인·출력)
+    </button>
+  </div>
+
+  <!-- 학생 선택 (기본 1명 이서연 + 학생 추가 버튼 유지) & 요일 선택 -->
+  <div class="top-bar">
+    <div class="tab-group" id="studentTabs"></div>
+    <div class="tab-group" id="dayTabs"></div>
+  </div>
+
+  <!-- ==========================================
+       [탭 1] 1~6교시 자기점검 화면
+       ========================================== -->
+  <div id="checkTabView">
+    <!-- 보기 전환 바 & 내 점수 가리기 버튼 -->
+    <div class="view-switcher">
+      <div class="period-nav-btns" id="periodNavBtns"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="privacy-btn" id="privacyBtn" onclick="toggleMaskMode()">
+          👁️ 내 점수 보이기 중 (선생님 평가 전 가리기)
+        </button>
+        <button class="mode-pill" id="viewToggleBtn" onclick="toggleViewMode()">
+          📋 1~6교시 한눈에 펼치기
+        </button>
+      </div>
+    </div>
+
+    <!-- 교시별 평가 카드 영역 -->
+    <div id="periodsContainer"></div>
+
+    <!-- [요청 반영] 이서연의 오늘 합격 도장판: 마지막(담임교사용 개별화 설정 바로 위)에 배치 -->
+    <div class="token-board">
+      <div class="token-header">
+        <div class="token-title">
+          🌟 <span id="boardStudentName" style="color:var(--primary);"></span>의 오늘 <span style="color:var(--success);">합격 도장</span>:
+          <span id="goodStampCount" style="font-size:1.6rem; color:var(--primary);">0</span>개
+          <span style="font-size:1rem; color:var(--text-sub);">(목표: <span id="goalCountText">4</span>개 이상 모으면 <strong>바르다상점 도장</strong> 받기!)</span>
+        </div>
+      </div>
+
+      <!-- 1~6교시 도장 슬롯 -->
+      <div class="token-slots" id="tokenSlots"></div>
+
+      <!-- 담임선생님과의 약속 (바르다상점 도장 vs 맨 뒷자리 5분 앉아 있기) -->
+      <div class="promise-bar">
+        <div class="promise-box reward-box">
+          <span style="font-size:2.2rem;">🏪</span>
+          <div>
+            <div style="font-size:0.85rem; opacity:0.85;">합격 도장 목표 달성 시 (담임선생님 강화)</div>
+            <div id="rewardDisplay" style="font-size:1.08rem;"></div>
+          </div>
+        </div>
+        <div class="promise-box practice-box">
+          <span style="font-size:2.2rem;">🪑</span>
+          <div>
+            <div style="font-size:0.85rem; opacity:0.85;">약속 안 지킬 경우 (빨간 도장 발생 시)</div>
+            <div id="practiceDisplay" style="font-size:1.08rem;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 보상 달성 / 약속 미이행 알림 배너 -->
+      <div class="celebration-banner" id="celebrationBanner"></div>
+    </div>
+
+    <!-- 하단 담임교사용 개별화 설정 패널 -->
+    <div class="teacher-settings">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <h3 style="font-size:1.15rem; font-weight:900;">⚙️ 담임교사용 개별화 설정 (학생 이름 · 목표 도장 · 강화/규칙 수정)</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="mode-pill" onclick="promptRenameStudent()">✏️ 현재 학생 이름 바꾸기</button>
+          <button class="mode-pill" onclick="resetTodayScores()">🔄 오늘 점수 초기화</button>
+          <button class="mode-pill" style="border-color:var(--danger); color:var(--danger);" onclick="deleteCurrentStudent()">학생 삭제</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <label style="font-size:0.9rem; font-weight:800; color:var(--primary);">👦 학생 이름 변경</label>
+          <input type="text" id="studentNameInput" class="setting-input" onchange="saveSettings()" placeholder="학생 이름 입력">
+        </div>
+        <div>
+          <label style="font-size:0.9rem; font-weight:800; color:var(--text-sub);">🎯 하루 목표 합격 도장 개수 (1~6개)</label>
+          <input type="number" min="1" max="6" id="goalInput" class="setting-input" onchange="saveSettings()">
+        </div>
+        <div>
+          <label style="font-size:0.9rem; font-weight:800; color:#047857;">🏪 합격 도장 달성 시 강화(보상)</label>
+          <input type="text" id="rewardInput" class="setting-input" onchange="saveSettings()">
+        </div>
+        <div>
+          <label style="font-size:0.9rem; font-weight:800; color:#b45309;">🪑 약속 안 지킬 경우 규칙</label>
+          <input type="text" id="practiceInput" class="setting-input" onchange="saveSettings()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       [탭 2] 매교시 3가지 약속 행동계약서 (사인 & 인쇄)
+       ========================================== -->
+  <div id="contractTabView" class="contract-wrapper">
+    <div class="contract-toolbar">
+      <div style="font-weight:800; color:var(--text-sub);">
+        💡 화면에서 바로 손가락/펜으로 사인한 뒤 인쇄하거나, 빈칸으로 인쇄해 종이에 직접 사인할 수 있습니다.
+      </div>
+      <button class="print-btn" onclick="window.print()">🖨️ 행동계약서 인쇄 / PDF 저장</button>
+    </div>
+
+    <div class="contract-paper">
+      <div class="contract-title">📜 우리 반 수업 약속 행동계약서</div>
+      <div class="contract-subtitle">선생님과 마음을 맞추어 즐겁고 바르게 수업에 참여해요!</div>
+
+      <div class="contract-pledge">
+        나 <strong id="contractStudentName" style="color:var(--primary); font-size:1.35rem; text-decoration:underline;">이서연</strong> 학생은
+        1교시부터 6교시까지 모든 교과 수업 시간에<br>
+        아래 <strong>매교시 꼭 지키는 3가지 약속</strong>을 지킬 것을 담임선생님과 약속합니다.
+      </div>
+
+      <div class="contract-rules-title">📌 매교시 꼭 지키는 3가지 약속! (다짐 체크 ☑️)</div>
+      <div class="contract-rule-list">
+        <div class="contract-rule-item" onclick="toggleContractCheck(0)">
+          <div class="contract-rule-left">
+            <span style="font-size:2rem;">🙋‍♂️</span>
+            <span>1. "네" 대답하고 바로 따라하기</span>
+          </div>
+          <div class="contract-check-box" id="contractCheck0">✔️</div>
+        </div>
+
+        <div class="contract-rule-item" onclick="toggleContractCheck(1)">
+          <div class="contract-rule-left">
+            <span style="font-size:2rem;">😊</span>
+            <span>2. 징징거리지 않기</span>
+          </div>
+          <div class="contract-check-box" id="contractCheck1">✔️</div>
+        </div>
+
+        <div class="contract-rule-item" onclick="toggleContractCheck(2)">
+          <div class="contract-rule-left">
+            <span style="font-size:2rem;">🪑</span>
+            <span>3. 바른 자세로 앉기</span>
+          </div>
+          <div class="contract-check-box" id="contractCheck2">✔️</div>
+        </div>
+      </div>
+
+      <div class="contract-outcome-grid">
+        <div class="contract-outcome-card good">
+          <h4>🌟 약속을 잘 지키고 합격 도장을 모으면?</h4>
+          <p id="contractRewardText">바르다상점 도장 받기! 🏪💮</p>
+          <div style="font-size:0.9rem; margin-top:6px; opacity:0.85;">
+            (하루 목표: 합격 도장 <span id="contractGoalCount">4</span>개 이상 달성 시)
+          </div>
+        </div>
+
+        <div class="contract-outcome-card bad">
+          <h4>🪑 약속을 안 지키거나 거짓으로 점수를 매기면?</h4>
+          <p id="contractPracticeText">맨 뒷자리에서 5분간 혼자 앉아 있기 🪑⏱️</p>
+          <div style="font-size:0.9rem; margin-top:6px; opacity:0.85;">
+            (교과선생님 평가 1~2점 또는 점수 불일치로 빨간 도장 발생 시)
+          </div>
+        </div>
+      </div>
+
+      <div class="contract-date-row">
+        약속한 날: <input type="text" id="contractDateInput" class="contract-date-input" onchange="saveContractDate()">
+      </div>
+
+      <div class="signature-grid">
+        <div class="sig-box">
+          <div class="sig-header">
+            <span>✍️ 학생 서명 (<span id="sigStudentLabel">이서연</span>)</span>
+            <button class="sig-clear-btn" onclick="clearSignature('studentSigCanvas')">지우기</button>
+          </div>
+          <canvas id="studentSigCanvas" class="sig-canvas" width="380" height="130"></canvas>
+          <div class="sig-guide">위 네모 칸에 손가락이나 마우스(펜)로 이름을 써 보세요</div>
+        </div>
+
+        <div class="sig-box">
+          <div class="sig-header">
+            <span>👩‍🏫 담임선생님 서명</span>
+            <button class="sig-clear-btn" onclick="clearSignature('teacherSigCanvas')">지우기</button>
+          </div>
+          <canvas id="teacherSigCanvas" class="sig-canvas" width="380" height="130"></canvas>
+          <div class="sig-guide">위 네모 칸에 선생님 서명을 해 주세요</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DAYS_KR = ['월', '화', '수', '목', '금'];
+  const STORAGE_KEY = 'special_ed_self_check_v4';
+
+  const SCALE_5 = [
+    { score: 1, emoji: '😣', stars: '⭐', text: '1점: 징징거리고 지시를 안 따랐어요' },
+    { score: 2, emoji: '😕', stars: '⭐⭐', text: '2점: 자세가 흐트러지고 딴짓했어요' },
+    { score: 3, emoji: '😐', stars: '⭐⭐⭐', text: '3점: 두 번 말할 때 바르게 앉아 했어요' },
+    { score: 4, emoji: '🙂', stars: '⭐⭐⭐⭐', text: '4점: 징징거리지 않고 바르게 앉아 따랐어요' },
+    { score: 5, emoji: '🤩', stars: '⭐⭐⭐⭐⭐', text: '5점: "네!" 대답하고 바른 자세로 바로 했어요' }
+  ];
+
+  const SCALE_3 = [
+    { score: 1, emoji: '😣', stars: '🔴 안 지켰어요', text: '1점: 징징거리거나 안 따랐어요' },
+    { score: 3, emoji: '😐', stars: '🟡 보통이에요', text: '3점: 조금 힘들었지만 바르게 앉았어요' },
+    { score: 5, emoji: '🤩', stars: '🟢 최고예요!', text: '5점: "네!" 대답하고 바른 자세로 바로 했어요!' }
+  ];
+
+  const now = new Date();
+  const jsDay = now.getDay();
+  let selectedDayIdx = (jsDay >= 1 && jsDay <= 5) ? jsDay - 1 : 0;
+  let currentPeriodIdx = 0;
+  let singlePeriodView = true;
+  let maskStudentScore = false;
+  let activeMainTab = 'check'; // 'check' 또는 'contract'
+
+  function createDefaultWeek() {
+    const defaultSubjects = [
+      ['국어', '수학', '사회', '체육', '음악', '진로'],
+      ['국어', '생활수학', '과학', '미술', '체육', '자율'],
+      ['수학', '국어', '사회', '정보', '음악', '동아리'],
+      ['국어', '수학', '과학', '체육', '미술', '창체'],
+      ['국어', '사회', '체육', '음악', '미술', '생활지도']
+    ];
+    return DAYS_KR.map((dayName, dIdx) => ({
+      day: dayName,
+      periods: Array.from({ length: 6 }, (_, pIdx) => ({
+        period: pIdx + 1,
+        subject: defaultSubjects[dIdx][pIdx] || `${pIdx + 1}교시`,
+        teacher: '교과선생님',
+        studentScore: null,
+        teacherScore: null
+      }))
+    }));
+  }
+
+  const todayFormatted = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+
+  // [요청 반영] 기본 학생은 '이서연' 1명만 나타나도록 설정
+  const defaultData = {
+    scaleMode: 5,
+    currentStudentId: 1,
+    students: [
+      {
+        id: 1,
+        name: '이서연',
+        goalStamps: 4,
+        rewardText: '바르다상점 도장 받기! 🏪💮',
+        practiceText: '맨 뒷자리에서 5분간 혼자 앉아 있기 🪑⏱️',
+        contractDate: todayFormatted,
+        contractChecks: [true, true, true],
+        studentSigData: null,
+        teacherSigData: null,
+        weekData: createDefaultWeek()
+      }
+    ]
+  };
+
+  let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  }
+
+  function getCurrentStudent() {
+    return appData.students.find(s => s.id === appData.currentStudentId) || appData.students[0];
+  }
+
+  // 메인 탭 전환 (자기점검표 vs 행동계약서)
+  function switchMainTab(tab) {
+    activeMainTab = tab;
+    document.getElementById('navCheckBtn').classList.toggle('active', tab === 'check');
+    document.getElementById('navContractBtn').classList.toggle('active', tab === 'contract');
+    document.getElementById('checkTabView').style.display = (tab === 'check') ? 'block' : 'none';
+    document.getElementById('contractTabView').style.display = (tab === 'contract') ? 'block' : 'none';
+    document.getElementById('dayTabs').style.display = (tab === 'check') ? 'flex' : 'none';
+    document.getElementById('scaleControls').style.display = (tab === 'check') ? 'flex' : 'none';
+    renderAll();
+  }
+
+  function setScaleMode(mode) {
+    appData.scaleMode = mode;
+    saveData();
+    renderAll();
+  }
+
+  function selectStudent(id) {
+    appData.currentStudentId = id;
+    saveData();
+    renderAll();
+    loadSignatures();
+  }
+
+  function promptRenameStudent(e, targetId) {
+    if (e) e.stopPropagation();
+    const student = targetId
+      ? appData.students.find(s => s.id === targetId)
+      : getCurrentStudent();
+    if (!student) return;
+
+    const newName = prompt('변경할 학생 이름을 입력하세요:', student.name);
+    if (newName && newName.trim()) {
+      student.name = newName.trim();
+      saveData();
+      renderAll();
+    }
+  }
+
+  function selectDay(idx) {
+    selectedDayIdx = idx;
+    renderAll();
+  }
+
+  function selectPeriod(pIdx) {
+    currentPeriodIdx = pIdx;
+    renderAll();
+  }
+
+  function toggleViewMode() {
+    singlePeriodView = !singlePeriodView;
+    renderAll();
+  }
+
+  function toggleMaskMode() {
+    maskStudentScore = !maskStudentScore;
+    const btn = document.getElementById('privacyBtn');
+    if (maskStudentScore) {
+      btn.textContent = '🙈 내 점수 숨김 중 (교과선생님 평가 차례)';
+      btn.classList.add('locked');
+    } else {
+      btn.textContent = '👁️ 내 점수 보이기 중 (선생님 평가 전 가리기)';
+      btn.classList.remove('locked');
+    }
+    renderAll();
+  }
+
+  function addStudent() {
+    const name = prompt('추가할 학생 이름을 입력하세요:');
+    if (!name || !name.trim()) return;
+    const newStudent = {
+      id: Date.now(),
+      name: name.trim(),
+      goalStamps: 4,
+      rewardText: '바르다상점 도장 받기! 🏪💮',
+      practiceText: '맨 뒷자리에서 5분간 혼자 앉아 있기 🪑⏱️',
+      contractDate: todayFormatted,
+      contractChecks: [true, true, true],
+      studentSigData: null,
+      teacherSigData: null,
+      weekData: createDefaultWeek()
+    };
+    appData.students.push(newStudent);
+    appData.currentStudentId = newStudent.id;
+    saveData();
+    renderAll();
+    loadSignatures();
+  }
+
+  function deleteCurrentStudent() {
+    if (appData.students.length <= 1) {
+      alert('최소 1명의 학생은 남아있어야 합니다.');
+      return;
+    }
+    const student = getCurrentStudent();
+    if (confirm(`'${student.name}' 학생을 삭제할까요?`)) {
+      appData.students = appData.students.filter(s => s.id !== student.id);
+      appData.currentStudentId = appData.students[0].id;
+      saveData();
+      renderAll();
+      loadSignatures();
+    }
+  }
+
+  function saveSettings() {
+    const student = getCurrentStudent();
+    const newName = document.getElementById('studentNameInput').value.trim();
+    if (newName) student.name = newName;
+
+    const g = parseInt(document.getElementById('goalInput').value, 10);
+    student.goalStamps = (g >= 1 && g <= 6) ? g : 4;
+    student.rewardText = document.getElementById('rewardInput').value;
+    student.practiceText = document.getElementById('practiceInput').value;
+    saveData();
+    renderAll();
+  }
+
+  function updateMeta(pIdx, field, value) {
+    const student = getCurrentStudent();
+    student.weekData[selectedDayIdx].periods[pIdx][field] = value;
+    saveData();
+    renderAll();
+  }
+
+  function toggleContractCheck(idx) {
+    const student = getCurrentStudent();
+    if (!student.contractChecks) student.contractChecks = [true, true, true];
+    student.contractChecks[idx] = !student.contractChecks[idx];
+    saveData();
+    renderAll();
+  }
+
+  function saveContractDate() {
+    const student = getCurrentStudent();
+    student.contractDate = document.getElementById('contractDateInput').value;
+    saveData();
+  }
+
+  // 교시별 판정 로직
+  function getPeriodResult(p) {
+    const s = p.studentScore;
+    const t = p.teacherScore;
+
+    if (s === null || t === null) {
+      return {
+        type: 'wait',
+        icon: '⚪',
+        slotText: '평가 전',
+        title: '아직 평가가 끝나지 않았어요',
+        sub: '나와 교과선생님이 모두 별점을 눌러주세요!'
+      };
+    }
+
+    const diff = Math.abs(s - t);
+
+    if (t <= 2) {
+      if (diff <= 1) {
+        return {
+          type: 'bad',
+          icon: '🔴',
+          slotText: '약속 미이행',
+          title: '솔직하게 말했지만 수업 약속을 안 지켰어요! (맨 뒷자리 5분 앉아 있기)',
+          sub: `선생님 ${t}점 · 내 생각 ${s}점 👉 약속을 안 지켜서 맨 뒷자리에서 5분간 혼자 앉아 있어요.`
+        };
+      } else {
+        return {
+          type: 'bad',
+          icon: '🔴',
+          slotText: '약속 미이행',
+          title: '약속도 안 지키고 점수도 높게 눌렀어요! (맨 뒷자리 5분 앉아 있기)',
+          sub: `선생님 ${t}점 vs 내 생각 ${s}점 👉 맨 뒷자리에서 5분간 혼자 앉아 반성해요.`
+        };
+      }
+    }
+
+    if (diff === 0) {
+      return {
+        type: 'good',
+        icon: '🟢',
+        slotText: '합격 도장!',
+        title: '참 잘했어요! 선생님과 마음이 똑같아요! (합격 도장 쾅!)',
+        sub: `선생님 ${t}점 = 내 생각 ${s}점 ("네" 대답하기·징징거리지 않기·바른 자세 약속 성공!)`
+      };
+    }
+
+    if (diff === 1) {
+      return {
+        type: 'good',
+        icon: '🟢',
+        slotText: '합격 도장!',
+        title: '잘했어요! 선생님 생각과 거의 비슷해요! (합격 도장 쾅!)',
+        sub: `선생님 ${t}점 · 내 생각 ${s}점 (1점 차이로 비슷해서 합격 도장을 받아요)`
+      };
+    }
+
+    return {
+      type: 'bad',
+      icon: '🔴',
+      slotText: '생각 불일치',
+      title: '내 생각과 선생님 생각이 너무 달라요! (맨 뒷자리 5분 앉아 있기)',
+      sub: `선생님 ${t}점 vs 내 생각 ${s}점 👉 정직하게 점검하지 않아 맨 뒷자리에서 5분간 혼자 앉아 있어요.`
+    };
+  }
+
+  function setScore(pIdx, role, score) {
+    const student = getCurrentStudent();
+    const periods = student.weekData[selectedDayIdx].periods;
+
+    const prevGood = periods.filter(p => getPeriodResult(p).type === 'good').length;
+
+    if (role === 'student') {
+      periods[pIdx].studentScore = (periods[pIdx].studentScore === score) ? null : score;
+    } else {
+      periods[pIdx].teacherScore = (periods[pIdx].teacherScore === score) ? null : score;
+    }
+
+    const newGood = periods.filter(p => getPeriodResult(p).type === 'good').length;
+    saveData();
+    renderAll();
+
+    if (prevGood < student.goalStamps && newGood >= student.goalStamps) {
+      launchConfetti();
+    }
+  }
+
+  function resetTodayScores() {
+    const student = getCurrentStudent();
+    if (confirm('오늘 1~6교시 점수를 모두 지우고 처음부터 다시 할까요?')) {
+      student.weekData[selectedDayIdx].periods.forEach(p => {
+        p.studentScore = null;
+        p.teacherScore = null;
+      });
+      saveData();
+      renderAll();
+    }
+  }
+
+  function renderPeriodCard(p, pIdx, scaleList) {
+    const res = getPeriodResult(p);
+    let cardClass = '';
+    if (res.type === 'good') cardClass = 'status-good';
+    else if (res.type === 'try') cardClass = 'status-try';
+    else if (res.type === 'bad') cardClass = 'status-bad';
+
+    const gridClass = appData.scaleMode === 5 ? 'scale-grid-5' : 'scale-grid-3';
+
+    let studentButtonsHtml = '';
+    if (maskStudentScore) {
+      studentButtonsHtml = `
+        <div class="blind-notice">
+          🙈 학생이 선택한 점수를 가려두었어요! (${p.studentScore !== null ? '학생 선택 완료' : '학생 미선택'})<br>
+          <span style="font-size:0.95rem; font-weight:700;">교과선생님이 아래에서 점수를 누른 뒤 상단 [보이기] 버튼을 눌러 비교해 보세요.</span>
+        </div>
+      `;
+    } else {
+      studentButtonsHtml = `
+        <div class="${gridClass}">
+          ${scaleList.map(item => `
+            <button class="big-choice-btn ${p.studentScore === item.score ? 'selected-student' : ''}"
+                    onclick="setScore(${pIdx}, 'student', ${item.score})">
+              <span class="big-emoji">${item.emoji}</span>
+              <span class="stars-row">${item.stars}</span>
+              <span class="action-text">${item.text}</span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    const teacherButtonsHtml = `
+      <div class="${gridClass}">
+        ${scaleList.map(item => `
+          <button class="big-choice-btn ${p.teacherScore === item.score ? 'selected-teacher' : ''}"
+                  onclick="setScore(${pIdx}, 'teacher', ${item.score})">
+            <span class="big-emoji">${item.emoji}</span>
+            <span class="stars-row">${item.stars}</span>
+            <span class="action-text">${item.text}</span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    return `
+      <div class="period-card ${cardClass}">
+        <div class="period-card-header">
+          <div class="period-badge">🔔 ${p.period}교시 (${p.subject})</div>
+          <div class="meta-inputs">
+            <input type="text" class="meta-input" value="${p.subject}"
+                   onchange="updateMeta(${pIdx}, 'subject', this.value)" placeholder="과목명">
+            <input type="text" class="meta-input" value="${p.teacher}"
+                   onchange="updateMeta(${pIdx}, 'teacher', this.value)" placeholder="교과선생님 성함">
+          </div>
+        </div>
+
+        <!-- 1. 학생 자기점검 -->
+        <div class="eval-section">
+          <div class="eval-who">
+            <span style="color:var(--primary);">🙋‍♂️ 1단계: 내가 생각한 이번 시간 약속 점수는?</span>
+            <span>${!maskStudentScore && p.studentScore ? `내 선택: ${p.studentScore}점` : ''}</span>
+          </div>
+          ${studentButtonsHtml}
+        </div>
+
+        <!-- 2. 교과교사 평가 -->
+        <div class="eval-section">
+          <div class="eval-who">
+            <span style="color:#d97706;">👩‍🏫 2단계: ${p.teacher}이 보신 약속 점수는?</span>
+            <span>${p.teacherScore ? `선생님 선택: ${p.teacherScore}점` : ''}</span>
+          </div>
+          ${teacherButtonsHtml}
+        </div>
+
+        <!-- 3. 일치도 도장 결과 -->
+        <div class="match-feedback">
+          <div class="feedback-left">
+            <div class="feedback-stamp">${maskStudentScore && p.teacherScore === null ? '🔒' : res.icon}</div>
+            <div>
+              <div class="feedback-title">${maskStudentScore && p.teacherScore === null ? '교과선생님 평가 후 도장이 공개됩니다' : res.title}</div>
+              <div class="feedback-sub">${maskStudentScore && p.teacherScore === null ? '' : res.sub}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAll() {
+    const student = getCurrentStudent();
+    if (!student) return;
+
+    document.getElementById('scaleMode5').classList.toggle('active', appData.scaleMode === 5);
+    document.getElementById('scaleMode3').classList.toggle('active', appData.scaleMode === 3);
+
+    // 학생 탭 (1명 기본 + 학생 추가 버튼 유지)
+    document.getElementById('studentTabs').innerHTML = appData.students.map(s => `
+      <button class="tab-btn ${s.id === student.id ? 'active' : ''}" onclick="selectStudent(${s.id})">
+        <span>👧 ${s.name}</span>
+        <span class="edit-name-badge" onclick="promptRenameStudent(event, ${s.id})" title="이름 수정">✏️</span>
+      </button>
+    `).join('') + `<button class="tab-btn" style="background:#e2e8f0;" onclick="addStudent()">+ 학생 추가</button>`;
+
+    // 요일 탭
+    document.getElementById('dayTabs').innerHTML = DAYS_KR.map((d, idx) => `
+      <button class="day-btn ${idx === selectedDayIdx ? 'active' : ''}" onclick="selectDay(${idx})">
+        ${d}요일
+      </button>
+    `).join('');
+
+    const periods = student.weekData[selectedDayIdx].periods;
+
+    // 교시 이동 버튼 & 전체보기 토글
+    const navEl = document.getElementById('periodNavBtns');
+    if (singlePeriodView) {
+      navEl.innerHTML = periods.map((p, idx) => `
+        <button class="p-nav-btn ${idx === currentPeriodIdx ? 'active' : ''}" onclick="selectPeriod(${idx})">
+          ${p.period}교시 (${p.subject})
+        </button>
+      `).join('');
+      document.getElementById('viewToggleBtn').textContent = '📋 1~6교시 한눈에 펼치기';
+    } else {
+      navEl.innerHTML = `<div style="font-weight:900; color:var(--primary); font-size:1.1rem;">📋 1~6교시 전체 펼쳐보기 중</div>`;
+      document.getElementById('viewToggleBtn').textContent = '🔍 한 교시씩 크게 보기 (학생용 추천)';
+    }
+
+    // 교시 카드 렌더링
+    const scaleList = appData.scaleMode === 5 ? SCALE_5 : SCALE_3;
+    const container = document.getElementById('periodsContainer');
+
+    if (singlePeriodView) {
+      container.innerHTML = renderPeriodCard(periods[currentPeriodIdx], currentPeriodIdx, scaleList);
+    } else {
+      container.innerHTML = periods.map((p, idx) => renderPeriodCard(p, idx, scaleList)).join('');
+    }
+
+    // 하단 합격 도장판 렌더링 (담임교사용 개별화 설정 바로 위)
+    let goodCount = 0;
+    let badCount = 0;
+
+    document.getElementById('tokenSlots').innerHTML = periods.map((p, idx) => {
+      const res = getPeriodResult(p);
+      if (res.type === 'good') goodCount++;
+      if (res.type === 'bad') badCount++;
+
+      let slotClass = '';
+      if (res.type === 'good') slotClass = 'stamp-good';
+      else if (res.type === 'try') slotClass = 'stamp-try';
+      else if (res.type === 'bad') slotClass = 'stamp-bad';
+
+      const isCurrent = singlePeriodView && idx === currentPeriodIdx;
+
+      return `
+        <div class="token-slot ${slotClass} ${isCurrent ? 'active-period' : ''}" onclick="selectPeriod(${idx})">
+          <div class="slot-period">${p.period}교시 (${p.subject})</div>
+          <div class="slot-icon">${res.icon}</div>
+          <div class="slot-label">${res.slotText}</div>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('boardStudentName').textContent = student.name;
+    document.getElementById('goodStampCount').textContent = goodCount;
+    document.getElementById('goalCountText').textContent = student.goalStamps;
+    document.getElementById('rewardDisplay').textContent = student.rewardText;
+    document.getElementById('practiceDisplay').textContent = student.practiceText;
+
+    // 도장판 내 축하/규칙 배너
+    const banner = document.getElementById('celebrationBanner');
+    if (goodCount >= student.goalStamps && badCount === 0) {
+      banner.style.display = 'block';
+      banner.style.background = 'linear-gradient(90deg, #10b981, #3b82f6)';
+      banner.innerHTML = `🎉 우와! ${student.name} 학생이 합격 도장 ${goodCount}개를 모았어요!<br><span style="font-size:1.15rem;">🏪 보상: ${student.rewardText}</span>`;
+    } else if (goodCount >= student.goalStamps && badCount > 0) {
+      banner.style.display = 'block';
+      banner.style.background = 'linear-gradient(90deg, #10b981, #f59e0b)';
+      banner.innerHTML = `🎉 합격 도장 ${goodCount}개로 <strong>${student.rewardText}</strong> 달성! (단, 빨간 도장 ${badCount}회 👉 ${student.practiceText} 후 도장 지급)`;
+    } else if (badCount >= 1) {
+      banner.style.display = 'block';
+      banner.style.background = 'linear-gradient(90deg, #f97316, #ef4444)';
+      banner.innerHTML = `🪑 오늘 약속 미이행(빨간 도장)이 ${badCount}번 있어요.<br><span style="font-size:1.15rem;">👉 약속 규칙: ${student.practiceText}</span>`;
+    } else {
+      banner.style.display = 'none';
+    }
+
+    // 하단 설정값 동기화
+    document.getElementById('studentNameInput').value = student.name;
+    document.getElementById('goalInput').value = student.goalStamps;
+    document.getElementById('rewardInput').value = student.rewardText;
+    document.getElementById('practiceInput').value = student.practiceText;
+
+    // 행동계약서 탭 데이터 동기화
+    document.getElementById('contractStudentName').textContent = student.name;
+    document.getElementById('sigStudentLabel').textContent = student.name;
+    document.getElementById('contractRewardText').textContent = student.rewardText;
+    document.getElementById('contractPracticeText').textContent = student.practiceText;
+    document.getElementById('contractGoalCount').textContent = student.goalStamps;
+    document.getElementById('contractDateInput').value = student.contractDate || todayFormatted;
+
+    const checks = student.contractChecks || [true, true, true];
+    [0, 1, 2].forEach(i => {
+      document.getElementById(`contractCheck${i}`).textContent = checks[i] ? '✔️' : '';
+    });
+  }
+
+  // =====================================
+  // 전자서명 캔버스 (마우스 & 터치 지원)
+  // =====================================
+  function setupSignatureCanvas(canvasId, storageField) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#1e1b4b';
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function moveDraw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      const pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function endDraw() {
+      if (!drawing) return;
+      drawing = false;
+      const student = getCurrentStudent();
+      student[storageField] = canvas.toDataURL();
+      saveData();
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    window.addEventListener('mouseup', endDraw);
+
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', moveDraw, { passive: false });
+    window.addEventListener('touchend', endDraw);
+  }
+
+  function clearSignature(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const student = getCurrentStudent();
+    if (canvasId === 'studentSigCanvas') student.studentSigData = null;
+    else student.teacherSigData = null;
+    saveData();
+  }
+
+  function loadSignatures() {
+    const student = getCurrentStudent();
+    ['studentSigCanvas', 'teacherSigCanvas'].forEach(canvasId => {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const dataUrl = (canvasId === 'studentSigCanvas') ? student.studentSigData : student.teacherSigData;
+      if (dataUrl) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0);
+        img.src = dataUrl;
+      }
+    });
+  }
+
+  function launchConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = Array.from({ length: 80 }).map(() => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      size: Math.random() * 10 + 6,
+      speedY: Math.random() * 4 + 3,
+      speedX: Math.random() * 4 - 2,
+      color: ['#f59e0b', '#10b981', '#4f46e5', '#ec4899', '#3b82f6'][Math.floor(Math.random() * 5)]
+    }));
+
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        p.y += p.speedY;
+        p.x += p.speedX;
+      });
+      frame++;
+      if (frame < 120) requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    draw();
+  }
+
+  setupSignatureCanvas('studentSigCanvas', 'studentSigData');
+  setupSignatureCanvas('teacherSigCanvas', 'teacherSigData');
+  renderAll();
+  loadSignatures();
+</script>
+
+</body>
+</html>
